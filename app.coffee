@@ -1,36 +1,39 @@
 argv = require('optimist')
-    .usage('Start stormtower with a configuration file.\nUsage: $0 -f [file path]')
-    .demand('f')
-    .default('f','/etc/stormtower/storm.json')
-    .alias('f', 'file')
-    .describe('f', 'location of stormtower configuration file')
+    .usage('Start stormtower with a configuration file.\nUsage: $0 -c <config file>')
+    .demand('c')
+    .default('c','/etc/stormstack/stormtower.json')
+    .alias('c', 'file')
+    .describe('c', 'location of stormtower configuration file')
     .argv
 
-configJSON = ''
+util = require('util')
 
 try
     fs = require("fs")
-    configRaw = fs.readFileSync argv.file
-    configJSON = JSON.parse configRaw
-    console.log 'config file: ' + argv.file
-    console.log configJSON
-catch err
-    console.error err.code + ' error while reading config file: ' + argv.file
-    throw err
+    config = JSON.parse fs.readFileSync argv.file
+    util.log 'stormtower config file: ' + argv.file
 
-if configJSON.port?
-    # start the zappajs web server on desired port
-    {@app} = require('zappajs') configJSON.port, ->
-        @configure =>
-          @use 'bodyParser', 'methodOverride', @app.router, 'static'
-          @set 'basepath': '/v1.0'
+catch err
+    util.log err.code + ' error while reading config file: ' + argv.file
+    util.log "stormtower using default storm parameters..."
+finally
+    config.uid ?= 'stormtower'
+    config.port ?= 8080
+    util.log 'stormtower version ' if config.version ?=
+    util.log 'stormtower will run on port ' + config.port
     
-        @configure
-          development: => @use errorHandler: {dumpExceptions: on, showStack: on}
-          production: => @use 'errorHandler'
-    
-        @enable 'serve jquery', 'minify'
-        @include './lib/proxy'
-else
-    console.error 'port is not defined in the config file ' + argv.file
+
+# start the zappajs web server on desired port
+{@app} = require('zappajs') config.port, ->
+    @configure =>
+      @use 'bodyParser', 'methodOverride', @app.router, 'static'
+      @set 'basepath': '/v1.0'
+
+    @configure
+      development: => @use errorHandler: {dumpExceptions: on, showStack: on}
+      production: => @use 'errorHandler'
+
+    @enable 'serve jquery', 'minify'
+    @include './lib/proxy'
+
 
