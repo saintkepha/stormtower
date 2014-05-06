@@ -9,8 +9,9 @@ util = require('util')
     stormtower = new storm(1000)
     stormtower.startDiscovery()
     
-    @get '/stormtower/activated': ->
-        @send JSON.stringify(stormtower.getCnameList())
+    @get '/stormtower/active': ->
+        #@send JSON.stringify(stormtower.getCnameList())
+        @json stormtower.getCnameList()
     
     @get '/stormtower/stormflash/*': ->
         util.log 'GET on /' + @request.params[0]
