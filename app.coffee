@@ -19,7 +19,6 @@ catch err
 finally
     config.uid ?= 'stormtower'
     config.port ?= 8080
-    util.log 'stormtower version ' if config.version ?=
     util.log 'stormtower will run on port ' + config.port
     
 
