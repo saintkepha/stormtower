@@ -12,12 +12,16 @@ util = require('util')
 
     @head '/': ->
         util.log '[PROXY] HEAD /'
-        @res.header('Content-MD5', stormtower.getGlobalChecksum())
+        cnameList = @req.query.cnames
+        util.log '[PROXY] cname list received is ' + cnameList
+        @res.header('Content-MD5', stormtower.getGlobalChecksum(cnameList))
         @res.send ''
 
     @get '/': ->
         util.log '[PROXY] GET /'
-        @json stormtower.getPollingData()
+        cnameList = @req.query.cnames
+        util.log '[PROXY] cname list received is ' + cnameList
+        @json stormtower.getPollingData(cnameList)
 
     @get '/stormtower/active': ->
         util.log '[PROXY] GET /stormtower/active/ '

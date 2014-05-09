@@ -87,7 +87,7 @@ class stormtower
                         md5.update result
                         md5CheckSum = md5.digest("hex")
                         allEndPoints.StormResponses[cnameOrig] =
-                            response: cnameDetails
+                            Response: cnameDetails
                             checksum: md5CheckSum
                         
                     util.log '[stormflashPolling] [' + cnameOrig + '] reponse ends'
@@ -100,14 +100,27 @@ class stormtower
     getCnameList: ->
         activatedEndpoints
         
-    getPollingData: ->
-        allEndPoints
+    getPollingData: (cnameList) ->
+        util.log '[getPollingData] cname list is: ' + cnameList
+        unless cnameList?
+            return allEndPoints.StormResponses
+        else
+            customeList = {}
+            for cname in cnameList
+                customeList[cname] = allEndPoints.StormResponses[cname]
+            return customeList
         
-    getGlobalChecksum: ->
+    getGlobalChecksum: (cnameList) ->
         globalMD5 = crypto.createHash("md5")
-        for key, value of allEndPoints.StormResponses
-            util.log '[getGlobalChecksum] md5 checksum of ' + key + ' is ' + value.checksum
-            globalMD5.update value.checksum
+        util.log '[getGlobalChecksum] received cname list ' + cnameList
+        unless cnameList?
+            util.log '[getGlobalChecksum] adding cname to the list '
+            cnameList = (key for key, value of allEndPoints.StormResponses)
+            
+        for cname in cnameList
+            util.log '[getGlobalChecksum] adding md5 checksum of ' + cname
+            globalMD5.update JSON.stringify(allEndPoints.StormResponses[cname].Response)
+            
         allEndPoints.globalChecksum = globalMD5.digest("hex")
         util.log '[getGlobalChecksum] global md5 checksum ' + allEndPoints.globalChecksum
         allEndPoints.globalChecksum
