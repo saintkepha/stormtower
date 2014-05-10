@@ -15,13 +15,13 @@ class stormtower
     
     # Constructor for stormtower class
     constructor: (pollingInterval = 5000) ->
-        util.log '[constructor] stormtower object instantiated'
+        util.log '[constructor] stormtower object instantiating'
+        @boltServerHost = 'localhost'
         @boltClientPort = 5000
         @boltServerPort = 9000
         @pollingURL = '/'
-        @boltServerHost = 'localhost'
-        @pollingIntvMsec = pollingInterval
         @pollingDelayMsec = 2000
+        @pollingIntvMsec = pollingInterval
         
         @cnameDisOptions =
             hostname: @boltServerHost
@@ -38,7 +38,7 @@ class stormtower
             agent: false
         
     startPolling: ->
-        util.log '[startDiscovery] stormflash discovery is initiated'
+        util.log '[startPolling] stormflash discovery is initiated'
         setInterval @cnameDiscovery, @pollingIntvMsec
         
     cnameDiscovery: =>
@@ -83,9 +83,12 @@ class stormtower
                         md5 = crypto.createHash("md5")
                         md5.update result
                         md5CheckSum = md5.digest("hex")
+                        now = new Date
+                        timeStamp = now.getUTCMonth() +  ':' + now.getUTCDate() + ':' + now.getUTCFullYear() + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes() + ':' + now.getUTCSeconds() + ' UTC'
                         allEndPoints.StormResponses[cnameOrig] =
                             Response: cnameDetails
                             checksum: md5CheckSum
+                            lastUpdated: timeStamp
                         
                     util.log '[stormflashPolling] [' + cnameOrig + '] reponse ends'
             )
@@ -109,7 +112,7 @@ class stormtower
             return allEndPoints.StormResponses
         else
             for cname in cnameList
-                resObj.agents.push ({"cname": cname, "response": allEndPoints.StormResponses[cname].Response, "checksum": allEndPoints.StormResponses[cname].checksum})
+                resObj.agents.push ({"cname": cname, "response": allEndPoints.StormResponses[cname].Response, "checksum": allEndPoints.StormResponses[cname].checksum, "lastUpdated": allEndPoints.StormResponses[cname].lastUpdated})
             return resObj
         
     getGlobalChecksum: (cnameList) ->
