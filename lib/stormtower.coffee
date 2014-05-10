@@ -14,14 +14,14 @@ class stormtower
         StormResponses: {}
     
     # Constructor for stormtower class
-    constructor: (cnameInterval = 2000, pollingInterval = 10000) ->
+    constructor: (pollingInterval = 5000) ->
         util.log '[constructor] stormtower object instantiated'
         @boltClientPort = 5000
         @boltServerPort = 9000
         @pollingURL = '/'
         @boltServerHost = 'localhost'
-        @cnameDisIntvMsec = cnameInterval
         @pollingIntvMsec = pollingInterval
+        @pollingDelayMsec = 2000
         
         @cnameDisOptions =
             hostname: @boltServerHost
@@ -37,11 +37,12 @@ class stormtower
             method: 'GET'
             agent: false
         
-    startDiscovery: ->
+    startPolling: ->
         util.log '[startDiscovery] stormflash discovery is initiated'
-        setInterval @cnameDiscovery, @cnameDisIntvMsec
+        setInterval @cnameDiscovery, @pollingIntvMsec
         
     cnameDiscovery: =>
+        setTimeout @stormflashPolling, @pollingDelayMsec
         req = http.request(@cnameDisOptions, (res) ->
             result = ''
             res.on "data", (chunk) ->
@@ -55,10 +56,6 @@ class stormtower
             util.log err
             util.log '[ERROR] [cnameDiscovery] error ' + err
         req.end()
-        
-    startPolling: ->
-        util.log '[startPolling] polling stormflash endpoints is initiated'
-        setInterval @stormflashPolling, @pollingIntvMsec
         
     stormflashPolling: =>
         util.log '---------------- MASTER TABLE ----------------'
@@ -97,18 +94,23 @@ class stormtower
                 util.log '[ERROR] [stormflashPolling] [' + cnameOrig + '] error ' + err
             req.end()
         
-    getCnameList: ->
-        activatedEndpoints
-        
     getPollingData: (cnameList) ->
-        util.log '[getPollingData] cname list is: ' + cnameList
+        util.log '[getPollingData] cname list received: ' + cnameList
+        unless cnameList?
+            cnameList = (key for key, value of allEndPoints.StormResponses)
+            util.log '[getPollingData] cname list set to: ' + cnameList
+            
+        allEndPoints.globalChecksum = @getGlobalChecksum(cnameList)
+        resObj =
+            getGlobalChecksum: allEndPoints.globalChecksum
+            agents: []
+            
         unless cnameList?
             return allEndPoints.StormResponses
         else
-            customeList = {}
             for cname in cnameList
-                customeList[cname] = allEndPoints.StormResponses[cname]
-            return customeList
+                resObj.agents.push ({"cname": cname, "response": allEndPoints.StormResponses[cname].Response, "checksum": allEndPoints.StormResponses[cname].checksum})
+            return resObj
         
     getGlobalChecksum: (cnameList) ->
         globalMD5 = crypto.createHash("md5")
