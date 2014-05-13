@@ -18,7 +18,7 @@ class stormtower
         util.log '[constructor] stormtower object instantiating'
         @boltServerHost = 'localhost'
         @boltClientPort = 5000
-        @boltServerPort = 9000
+        @boltServerPort = 8000
         @pollingURL = '/'
         @pollingDelayMsec = 2000
         @pollingIntvMsec = pollingInterval

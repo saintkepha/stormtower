@@ -18,7 +18,7 @@ catch err
     util.log "stormtower using default storm parameters..."
 finally
     config.uid ?= 'stormtower'
-    config.port ?= 8080
+    config.port ?= 8020
     util.log 'stormtower will run on port ' + config.port
     
 
@@ -33,6 +33,6 @@ finally
       production: => @use 'errorHandler'
 
     @enable 'serve jquery', 'minify'
-    @include './lib/proxy'
+    @include './src/api'
 
 
