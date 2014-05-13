@@ -14,14 +14,17 @@ class stormtower
         StormResponses: {}
     
     # Constructor for stormtower class
-    constructor: (pollingInterval = 5000) ->
+    constructor: (configObj) ->
         util.log '[constructor] stormtower object instantiating'
-        @boltServerHost = 'localhost'
+        @boltServerHost = configObj.stormbolt.split(":")[0]
+        @boltServerPort = configObj.stormbolt.split(":")[1]
+        util.log '[constructor] stormbolt url: ' + @boltServerHost
+        util.log '[constructor] stormbolt port: ' + @boltServerPort
+        
         @boltClientPort = 5000
-        @boltServerPort = 8000
         @pollingURL = '/'
         @pollingDelayMsec = 2000
-        @pollingIntvMsec = pollingInterval
+        @pollingIntvMsec = 5000
         
         @cnameDisOptions =
             hostname: @boltServerHost
@@ -130,7 +133,9 @@ class stormtower
         util.log '[getGlobalChecksum] global md5 checksum ' + allEndPoints.globalChecksum
         allEndPoints.globalChecksum
     
-module.exports = stormtower
+#module.exports = stormtower
+module.exports = (args) ->
+    new stormtower args
 
 
 

@@ -5,10 +5,9 @@
 util = require('util')
 
 @include = ->
-    storm = require('./stormtower')
-    stormtower = new storm(5000)
+    stormtower = require('./stormtower')(@configObj)
     stormtower.startPolling()
-
+    
     @head '/': ->
         util.log '[PROXY] HEAD /'
         cnameList = @req.query.cnames

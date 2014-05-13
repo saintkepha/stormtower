@@ -24,6 +24,7 @@ finally
 
 # start the zappajs web server on desired port
 {@app} = require('zappajs') config.port, ->
+    @configObj = config
     @configure =>
       @use 'bodyParser', 'methodOverride', @app.router, 'static'
       @set 'basepath': '/v1.0'
