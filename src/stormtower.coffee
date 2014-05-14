@@ -64,7 +64,7 @@ class stormtower
     stormflashPolling: =>
         for key, value of allEndPoints.StormResponses
             if key not in activatedEndpoints
-                util.log '[stormflashPolling] ' + key + ' stormflash removed from master table'
+                util.log "[stormflashPolling] #{key} stormflash removed from master table"
                 delete allEndPoints.StormResponses[key]
             
         httpOptions = @cnamePollOptions
@@ -94,7 +94,7 @@ class stormtower
                             checksum: md5CheckSum
                             lastUpdated: timeStamp
                     else
-                        util.log '[stormflashPolling] ' + cname + ' stormflash removed from master table'
+                        util.log "[stormflashPolling] #{cname} stormflash removed from master table"
                         delete allEndPoints.StormResponses[cname]
                         
                     callback()
@@ -102,7 +102,7 @@ class stormtower
             )
             req.on "error", (err) ->
                 util.log "[stormflashPolling] #{cname} error " + err
-                util.log '[stormflashPolling] #{cname} stormflash removed from master table'
+                util.log "[stormflashPolling] #{cname} stormflash removed from master table"
                 delete allEndPoints.StormResponses[cname]
                 callback (err + cname)
                 @next
@@ -114,6 +114,14 @@ class stormtower
             else
                 util.log '[stormflashPolling] polling error ' + err
 
+            globalMD5 = crypto.createHash("md5")
+            for key, value of allEndPoints.StormResponses
+                util.log '[stormflashPolling] adding md5 checksum of ' + key
+                globalMD5.update JSON.stringify(allEndPoints.StormResponses[key].Response)
+                
+            allEndPoints.globalChecksum = globalMD5.digest("hex")
+            util.log '[stormflashPolling] global md5 checksum ' + allEndPoints.globalChecksum
+            
             util.log '---------------- MASTER TABLE ----------------'
             console.log allEndPoints
             util.log '------------------------------------------'
@@ -141,17 +149,16 @@ class stormtower
     getGlobalChecksum: (cnameList) ->
         globalMD5 = crypto.createHash("md5")
         util.log '[getGlobalChecksum] received cname list ' + cnameList
+        
         unless cnameList?
-            util.log '[getGlobalChecksum] adding cname to the list '
-            cnameList = (key for key, value of allEndPoints.StormResponses)
-            
-        for cname in cnameList
-            util.log '[getGlobalChecksum] adding md5 checksum of ' + cname
-            globalMD5.update JSON.stringify(allEndPoints.StormResponses[cname].Response)
-            
-        allEndPoints.globalChecksum = globalMD5.digest("hex")
-        util.log '[getGlobalChecksum] global md5 checksum ' + allEndPoints.globalChecksum
-        allEndPoints.globalChecksum
+            util.log '[getGlobalChecksum] returning the current global md5 checksum'
+            return allEndPoints.globalChecksum
+        else
+            for cname in cnameList
+                util.log '[getGlobalChecksum] adding md5 checksum of ' + cname
+                globalMD5.update JSON.stringify(allEndPoints.StormResponses[cname].Response)
+                
+            return globalMD5.digest("hex")
     
 #module.exports = stormtower
 module.exports = (args) ->
