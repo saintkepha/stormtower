@@ -36,7 +36,7 @@ class stormtower
         @cnamePollOptions =
             hostname: @boltServerHost
             port: @boltServerPort
-            path: '/cname'
+            path: '/'
             method: 'GET'
             agent: false
         
