@@ -136,7 +136,7 @@ class stormtower
             
         allEndPoints.globalChecksum = @getGlobalChecksum(cnameList)
         resObj =
-            getGlobalChecksum: allEndPoints.globalChecksum
+            globalChecksum: allEndPoints.globalChecksum
             agents: []
             
         unless cnameList?
