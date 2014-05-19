@@ -21,7 +21,7 @@
         post: 15000
     
     
-    @head '/': ->
+    @head '/stormtower': ->
         log '[PROXY] HEAD /'
         cnameList = @req.query.cnames
         log '[PROXY] cname list received is ', cnameList
@@ -29,7 +29,7 @@
         @res.send ''
         
         
-    @get '/': ->
+    @get '/stormtower': ->
         log '[PROXY] GET /'
         cnameList = @req.query.cnames
         log '[PROXY] cname list received is ', cnameList
