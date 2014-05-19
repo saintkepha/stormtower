@@ -52,6 +52,10 @@ class StormTower extends StormBolt
         setInterval @cnameDiscovery, @pollingIntvMsec
         
     cnameDiscovery: =>
+        # get the cname list of connected bolt-clients from super class stormbolt (server)
+        activatedEndpoints = (cnames for cnames of @connections)
+        @log '[cnameDiscovery] active stormflash list: ', activatedEndpoints
+        ###
         setTimeout @stormflashPolling, @pollingDelayMsec
         req = http.request(@cnameDisOptions, (res) ->
             result = ''
@@ -65,6 +69,7 @@ class StormTower extends StormBolt
         req.on "error", (err) =>
             @log '[ERROR] [cnameDiscovery] error ', err
         req.end()
+        ###
         
     stormflashPolling: =>
         for key, value of allEndPoints.StormResponses

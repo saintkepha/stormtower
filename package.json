@@ -51,6 +51,7 @@
 		"start": "node lib/app.js"
 	},
 	"contributors": [
-		"Sivaprasath Busa"
+		"Sivaprasath Busa",
+		"Priyabrata Sahoo"
 	]
 }
