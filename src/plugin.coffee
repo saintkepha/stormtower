@@ -20,8 +20,7 @@
         del: 5000
         post: 15000
     
-    
-    @head '/stormtower': ->
+    @head '/': ->
         log '[PROXY] HEAD /'
         cnameList = @req.query.cnames
         log '[PROXY] cname list received is ', cnameList
@@ -29,8 +28,23 @@
         @res.send ''
         
         
-    @get '/stormtower': ->
+    @get '/': ->
         log '[PROXY] GET /'
+        cnameList = @req.query.cnames
+        log '[PROXY] cname list received is ', cnameList
+        @json agent.getPollingData(cnameList)
+    
+    
+    @head '/stormtower': ->
+        log '[PROXY] HEAD /stormtower'
+        cnameList = @req.query.cnames
+        log '[PROXY] cname list received is ', cnameList
+        @res.header('Content-MD5', agent.getGlobalChecksum(cnameList))
+        @res.send ''
+        
+        
+    @get '/stormtower': ->
+        log '[PROXY] GET /stormtower'
         cnameList = @req.query.cnames
         log '[PROXY] cname list received is ', cnameList
         @json agent.getPollingData(cnameList)

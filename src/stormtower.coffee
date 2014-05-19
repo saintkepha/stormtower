@@ -23,10 +23,12 @@ class StormTower extends StormBolt
         @import module
 
         @log '[constructor] stormtower object instantiating'
-        @boltServerHost = @config.stormbolt.split(":")[0]
-        @boltServerPort = @config.stormbolt.split(":")[1]
-        @log '[constructor] stormbolt url: ', @boltServerHost
-        @log '[constructor] stormbolt port: ', @boltServerPort
+        @boltServerHost = 'localhost'
+        @boltServerPort = @config.relayPort
+        #@boltServerHost = @config.stormbolt.split(":")[0]
+        #@boltServerPort = @config.stormbolt.split(":")[1]
+        @log "[constructor] stormbolt url: #{@boltServerHost}"
+        @log "[constructor] stormbolt port: #{@boltServerPort}"
         
         @boltClientPort = 5000
         @pollingURL = '/'
