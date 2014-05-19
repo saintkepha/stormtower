@@ -46,7 +46,7 @@
             'stormbolt-target': @request.headers['stormbolt-target']
              
         resZappajs = @res
-        httpReqSender httpOptions, null, reqTimeout.get, cname, (reply) =>
+        agent.httpReqSender httpOptions, null, reqTimeout.get, cname, (reply) =>
             log "[PROXY GET] #{cname} received callback ", reply
             resZappajs.statusCode = reply.status
             resZappajs.json reply.output
@@ -64,7 +64,7 @@
             'stormbolt-target': @request.headers['stormbolt-target']
             
         resZappajs = @res
-        httpReqSender httpOptions, @body, reqTimeout.post, cname, (reply) =>
+        agent.httpReqSender httpOptions, @body, reqTimeout.post, cname, (reply) =>
             log "[PROXY POST] #{cname} received callback ", reply
             resZappajs.statusCode = reply.status
             resZappajs.json reply.output
@@ -82,7 +82,7 @@
             'stormbolt-target': @request.headers['stormbolt-target']
              
         resZappajs = @res
-        httpReqSender httpOptions, @body, reqTimeout.put, cname, (reply) =>
+        agent.httpReqSender httpOptions, @body, reqTimeout.put, cname, (reply) =>
             log "[PROXY PUT] #{cname} received callback " + reply
             resZappajs.statusCode = reply.status
             resZappajs.json reply.output
@@ -100,7 +100,7 @@
             'stormbolt-target': @request.headers['stormbolt-target']
              
         resZappajs = @res
-        httpReqSender httpOptions, null, reqTimeout.del, cname, (reply) =>
+        agent.httpReqSender httpOptions, null, reqTimeout.del, cname, (reply) =>
             log "[PROXY DELETE] #{cname} received callback ", reply
             resZappajs.statusCode = reply.status
             resZappajs.json reply.output

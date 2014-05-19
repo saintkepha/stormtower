@@ -170,7 +170,7 @@ class StormTower extends StormBolt
                 
             return globalMD5.digest("hex")
 
-    httpReqSender = (httpOptions, reqBody, timeout, cname, callback) ->
+    httpReqSender: (httpOptions, reqBody, timeout, cname, callback) ->
         @log "[httpReqSender] #{cname}"
         returnObj =
             status: 500
