@@ -11,8 +11,8 @@
     
     httpOptions =
         agent: false
-        port: GLOBAL.config.stormbolt.split(':')[1]
-        hostname: GLOBAL.config.stormbolt.split(':')[0]
+        port: agent.config.stormbolt.split(':')[1]
+        hostname: agent.config.stormbolt.split(':')[0]
         
     reqTimeout =
         get: 5000

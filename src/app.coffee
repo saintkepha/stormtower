@@ -7,14 +7,13 @@ argv = require('optimist')
     .argv
 
 config = require('../package').config
-GLOBAL.config = config
 
 util = require('util')
 
 util.log "stormtower coming up as the NFV application controller..."
 
 StormTower = require './stormtower'
-agent = new StormTower
+agent = new StormTower config
 
 # agent.on "running", ->
 #     @log "starting activation..."

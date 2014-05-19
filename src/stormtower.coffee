@@ -6,9 +6,9 @@ http = require('http')
 async = require('async')
 crypto = require("crypto")
 
-StormAgent = require 'stormagent'
+StormBolt = require 'stormbolt'
 
-class StormTower extends StormAgent
+class StormTower extends StormBolt
     activatedEndpoints = []
     allEndPoints =
         globalChecksum: ""
@@ -17,13 +17,14 @@ class StormTower extends StormAgent
     successStatusCodes = [200, 202, 204, 304]
     
     # Constructor for stormtower class
-    constructor: ->
-        super
+    constructor: (config) ->
+        super config
+        # key routine to import itself
         @import module
 
         @log '[constructor] stormtower object instantiating'
-        @boltServerHost = GLOBAL.config.stormbolt.split(":")[0]
-        @boltServerPort = GLOBAL.config.stormbolt.split(":")[1]
+        @boltServerHost = @config.stormbolt.split(":")[0]
+        @boltServerPort = @config.stormbolt.split(":")[1]
         @log '[constructor] stormbolt url: ', @boltServerHost
         @log '[constructor] stormbolt port: ', @boltServerPort
         
