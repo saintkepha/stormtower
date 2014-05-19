@@ -147,13 +147,15 @@ class StormTower extends StormBolt
         allEndPoints.globalChecksum = @getGlobalChecksum(cnameList)
         resObj =
             globalChecksum: allEndPoints.globalChecksum
-            agents: []
+            #agents: []
+            agents: {}
             
         unless cnameList?
             return allEndPoints.StormResponses
         else
             for cname in cnameList
-                resObj.agents.push ({"cname": cname, "response": allEndPoints.StormResponses[cname].Response, "checksum": allEndPoints.StormResponses[cname].checksum, "lastUpdated": allEndPoints.StormResponses[cname].lastUpdated})
+                resObj.agents[cname] = allEndPoints.StormResponses[cname]
+                #resObj.agents.push ({"cname": cname, "response": allEndPoints.StormResponses[cname].Response, "checksum": allEndPoints.StormResponses[cname].checksum, "lastUpdated": allEndPoints.StormResponses[cname].lastUpdated})
             return resObj
         
     getGlobalChecksum: (cnameList) ->
