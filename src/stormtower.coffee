@@ -3,24 +3,29 @@
 # acts as a proxy between stormgate/stormlight to communicate with VSC stormflash
 
 http = require('http')
-util = require('util')
 async = require('async')
 crypto = require("crypto")
 
+StormAgent = require 'stormagent'
 
-class stormtower
+class StormTower extends StormAgent
     activatedEndpoints = []
     allEndPoints =
         globalChecksum: ""
         StormResponses: {}
+
+    successStatusCodes = [200, 202, 204, 304]
     
     # Constructor for stormtower class
-    constructor: (configObj) ->
-        util.log '[constructor] stormtower object instantiating'
-        @boltServerHost = configObj.stormbolt.split(":")[0]
-        @boltServerPort = configObj.stormbolt.split(":")[1]
-        util.log '[constructor] stormbolt url: ' + @boltServerHost
-        util.log '[constructor] stormbolt port: ' + @boltServerPort
+    constructor: ->
+        super
+        @import module
+
+        @log '[constructor] stormtower object instantiating'
+        @boltServerHost = GLOBAL.config.stormbolt.split(":")[0]
+        @boltServerPort = GLOBAL.config.stormbolt.split(":")[1]
+        @log '[constructor] stormbolt url: ', @boltServerHost
+        @log '[constructor] stormbolt port: ', @boltServerPort
         
         @boltClientPort = 5000
         @pollingURL = '/'
@@ -42,7 +47,7 @@ class stormtower
             agent: false
         
     startPolling: ->
-        util.log '[startPolling] stormflash discovery is initiated'
+        @log '[startPolling] stormflash discovery is initiated'
         setInterval @cnameDiscovery, @pollingIntvMsec
         
     cnameDiscovery: =>
@@ -54,33 +59,32 @@ class stormtower
             res.on "end", ->
                 cnameList = JSON.parse result
                 activatedEndpoints = (endpoints.cname for endpoints in cnameList)
-                util.log '[cnameDiscovery] active stormflash list: ' + activatedEndpoints
+                @log '[cnameDiscovery] active stormflash list: ', activatedEndpoints
         )
-        req.on "error", (err) ->
-            util.log err
-            util.log '[ERROR] [cnameDiscovery] error ' + err
+        req.on "error", (err) =>
+            @log '[ERROR] [cnameDiscovery] error ', err
         req.end()
         
     stormflashPolling: =>
         for key, value of allEndPoints.StormResponses
             if key not in activatedEndpoints
-                util.log "[stormflashPolling] #{key} stormflash removed from master table"
+                @log "[stormflashPolling] #{key} stormflash removed from master table"
                 delete allEndPoints.StormResponses[key]
             
         httpOptions = @cnamePollOptions
         boltClientPort = @boltClientPort
-        async.each activatedEndpoints, ((cname, callback) ->
-            util.log "[stormflashPolling] #{cname}] polling started"
+        async.each activatedEndpoints, ((cname, callback) =>
+            @log "[stormflashPolling] #{cname}] polling started"
             boltHeaders =
                 'stormbolt-target' : "#{cname}: #{boltClientPort}"
             
             httpOptions.headers = boltHeaders
-            req = http.request(httpOptions, (res) ->
+            req = http.request(httpOptions, (res) =>
                 result = ''
                 res.on "data", (chunk) ->
                     result += chunk
-                res.on "end", ->
-                    util.log "[stormflashPolling] #{cname} response status " + res.statusCode
+                res.on "end", =>
+                    @log "[stormflashPolling] #{cname} response status ", res.statusCode
                     
                     if res.statusCode is 200
                         cnameDetails = JSON.parse result
@@ -94,45 +98,45 @@ class stormtower
                             checksum: md5CheckSum
                             lastUpdated: timeStamp
                     else
-                        util.log "[stormflashPolling] #{cname} stormflash removed from master table"
+                        @log "[stormflashPolling] #{cname} stormflash removed from master table"
                         delete allEndPoints.StormResponses[cname]
                         
                     callback()
                     return
             )
-            req.on "error", (err) ->
-                util.log "[stormflashPolling] #{cname} error " + err
-                util.log "[stormflashPolling] #{cname} stormflash removed from master table"
+            req.on "error", (err) =>
+                @log "[stormflashPolling] #{cname} error ", err
+                @log "[stormflashPolling] #{cname} stormflash removed from master table"
                 delete allEndPoints.StormResponses[cname]
                 callback (err + cname)
                 @next
             req.end()
-        ), (err) ->
+        ), (err) =>
         
             unless err?
-                util.log '[stormflashPolling] polling successful'
+                @log '[stormflashPolling] polling successful'
             else
-                util.log '[stormflashPolling] polling error ' + err
+                @log '[stormflashPolling] polling error ', err
 
             globalMD5 = crypto.createHash("md5")
             for key, value of allEndPoints.StormResponses
-                util.log '[stormflashPolling] adding md5 checksum of ' + key
+                @log '[stormflashPolling] adding md5 checksum of ', key
                 globalMD5.update JSON.stringify(allEndPoints.StormResponses[key].Response)
                 
             allEndPoints.globalChecksum = globalMD5.digest("hex")
-            util.log '[stormflashPolling] global md5 checksum ' + allEndPoints.globalChecksum
+            @log '[stormflashPolling] global md5 checksum ', allEndPoints.globalChecksum
             
-            util.log '---------------- MASTER TABLE ----------------'
+            @log '---------------- MASTER TABLE ----------------'
             console.log allEndPoints
-            util.log '------------------------------------------'
+            @log '------------------------------------------'
         
             return
         
     getPollingData: (cnameList) ->
-        util.log '[getPollingData] cname list received: ' + cnameList
+        @log '[getPollingData] cname list received: ' + cnameList
         unless cnameList?
             cnameList = (key for key, value of allEndPoints.StormResponses)
-            util.log '[getPollingData] cname list set to: ' + cnameList
+            @log '[getPollingData] cname list set to: ' + cnameList
             
         allEndPoints.globalChecksum = @getGlobalChecksum(cnameList)
         resObj =
@@ -148,21 +152,69 @@ class stormtower
         
     getGlobalChecksum: (cnameList) ->
         globalMD5 = crypto.createHash("md5")
-        util.log '[getGlobalChecksum] received cname list ' + cnameList
+        @log '[getGlobalChecksum] received cname list ', cnameList
         
         unless cnameList?
-            util.log '[getGlobalChecksum] returning the current global md5 checksum'
+            @log '[getGlobalChecksum] returning the current global md5 checksum'
             return allEndPoints.globalChecksum
         else
             for cname in cnameList
-                util.log '[getGlobalChecksum] adding md5 checksum of ' + cname
+                @log '[getGlobalChecksum] adding md5 checksum of ', cname
                 globalMD5.update JSON.stringify(allEndPoints.StormResponses[cname].Response)
                 
             return globalMD5.digest("hex")
+
+    httpReqSender = (httpOptions, reqBody, timeout, cname, callback) ->
+        @log "[httpReqSender] #{cname}"
+        returnObj =
+            status: 500
+            output: {}
+        
+        inputData = JSON.stringify reqBody
+        req = http.request(httpOptions, (res) =>
+            result = ''
+        
+            res.on "data", (chunk) ->
+                result += chunk
+            res.on "end", =>
+                @log "[httpReqSender] #{cname} response status ", res.statusCode
+                returnObj.status = res.statusCode
+            
+                if res.statusCode in successStatusCodes
+                    @log "[httpReqSender] #{cname} response: ", result
+                    returnObj.output = JSON.parse(result)
+                else
+                    if result
+                        @log "[httpReqSender] #{cname} failure: ", result.split('\n')[0]
+                        returnObj.output =
+                            error: result.split('\n')[0]
+                    else
+                        returnObj.output =
+                            error: 'info not available'
+                
+                callback (returnObj)
+        )
+        req.on "error", (err) =>
+            @log "[httpReqSender] #{cname} error ", err
+            returnObj.output =
+                error: err
+            callback returnObj
+       
+        req.setTimeout timeout, (reply) =>
+            @log "[httpReqSender] #{cname} timeout: "
+            returnObj.status = 408
+            returnObj.output =
+                error: 'http request got timeout'
+            callback (returnObj)
+        
+        if httpOptions.method in ['POST', 'PUT'] and inputData
+            @log "[httpReqSender] #{cname} input data: ", inputData
+            req.write inputData
+        
+        req.end()
+        @log "[httpReqSender] #{cname} request forwarded"
+
     
 #module.exports = stormtower
 module.exports = (args) ->
-    new stormtower args
-
-
-
+    new StormTower args
