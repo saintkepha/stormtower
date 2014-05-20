@@ -65,6 +65,7 @@ class TowerRegistry extends StormRegistry
 
     get: (key) ->
         entry = super key
+        return unless entry?
         entry.status
 
 #-----------------------------------------------------------------
