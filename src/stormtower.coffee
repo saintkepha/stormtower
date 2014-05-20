@@ -10,7 +10,8 @@ class TowerAgent extends StormData
 
     async = require 'async'
     http = require 'http'
-    crypto = require("crypto")
+    crypto = require 'crypto'
+    streamBuffers = require 'stream-buffers'
 
     constructor: (@id, @bolt) ->
         @status = false
@@ -23,8 +24,12 @@ class TowerAgent extends StormData
                 @monitoring
             (repeat) =>
                 try
-                    req = http.request '/'
-                    req.target = 8000
+                    req = new streamBuffers.ReadableStreamBuffer
+                    req.method  = 'GET'
+                    req.url     = '/'
+                    req.headers = null
+                    req.target  = 8000
+                    req.put "GET / HTTP/1.1\n\n", "utf8"
                     @bolt.relay req, (reply,complete) ->
                         return unless reply?
                         return if reply? and not reply instanceof Error and not complete
