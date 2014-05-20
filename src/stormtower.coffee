@@ -37,16 +37,16 @@ class TowerAgent extends StormData
                     @bolt.relay req, (reply,body) =>
                         unless reply instanceof Error
                             md5 = crypto.createHash "md5"
-                            md5.update reply
+                            md5.update body
                             checksum = md5.digest "hex"
                             unless checksum is @checksum
                                 try
-                                    status = JSON.parse data
+                                    status = JSON.parse body
                                     @status = status
                                     @emit 'changed', status, checksum
                                     callback status if callback?
                                 catch err
-                                    @log "unable to parse reply:", reply
+                                    @log "unable to parse reply:", body
                                     @log "error:", err
                         else
                             @log "error:",reply
