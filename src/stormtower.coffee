@@ -10,6 +10,7 @@ class TowerAgent extends StormData
 
     async = require('async')
     request = require 'request'
+    crypto = require("crypto")
 
     constructor: (@id, @bolt) ->
         @status = false
@@ -23,7 +24,7 @@ class TowerAgent extends StormData
             (repeat) =>
                 try
                     req = request
-                        url: "http://#{@bolt.id}/"
+                        url: "/"
                         timeout: interval
                         encoding: 'utf8'
                     req.target = 8000
