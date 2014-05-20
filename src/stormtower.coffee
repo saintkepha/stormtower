@@ -33,7 +33,7 @@ class TowerAgent extends StormData
                     ###
                     req = http.request '/'
                     req.target = 8000
-                    @bolt.relay req, (reply,complete) ->
+                    @bolt.relay req, (reply,complete) =>
                         return unless reply?
                         return if reply? and not reply instanceof Error and not complete
 
@@ -49,6 +49,10 @@ class TowerAgent extends StormData
                                     callback status if callback?
                                 catch err
                                     @log "unable to parse reply:", reply
+                                    @log "error:", err
+                        else
+                            @log "error:",reply
+
                         setTimeout repeat, interval
 
                 catch err
