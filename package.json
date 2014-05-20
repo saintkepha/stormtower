@@ -9,7 +9,7 @@
 		"url": "git://github.com/stormstack/stormtower.git"
 	},
 	"dependencies": {
-		"stormagent": "0.1.x",
+		"stormbolt": "0.2.x",
 		"request": "2.34.x",
 		"json-schema": "0.2.0",
 		"async": "0.8.x",
@@ -30,16 +30,10 @@
 	"config": {
 		"port": 8020,
 		"uuid": "stormtower",
-		"stormbolt": "localhost:8000",
 		"logfile": "/var/log/stormtower.log",
-		"datadir": "/var/stormtower",
 		"storm": {
-			"agent": true,
 			"functions": [
-				"agent.getPollingData",
-				"agent.getGlobalChecksum",
-				"agent.startPolling",
-				"agent.httpReqSender"
+				"agent.agents"
 			],
 			"plugins": [
 				"lib/plugin"
@@ -47,11 +41,11 @@
 		}
 	},
 	"scripts": {
-		"prepublish": "find src -name '*.coffee' | xargs coffee -o lib -c",
+		"prepublish": "mkdir -p lib; find src -name '*.coffee' | xargs coffee -o lib -c",
 		"start": "node lib/app.js"
 	},
 	"contributors": [
 		"Sivaprasath Busa",
-		"Priyabrata Sahoo"
+		"Peter Lee <peter@intercloud.net>"
 	]
 }

@@ -6,18 +6,8 @@ argv = require('optimist')
     .describe('c', 'location of stormtower configuration file')
     .argv
 
-config = require('../package').config
-
-util = require('util')
-
-util.log "stormtower coming up as the NFV application controller..."
+console.log 'stormtower rising up to stand against the coming storm...'
 
 StormTower = require './stormtower'
-agent = new StormTower config
-
-# agent.on "running", ->
-#     @log "starting activation..."
-#     @activate null, (err, status) =>
-#         @log "activation completed with:", status
-
+agent = new StormTower
 agent.run()
