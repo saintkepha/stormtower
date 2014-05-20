@@ -11,7 +11,6 @@ class TowerAgent extends StormData
     async = require 'async'
     http = require 'http'
     crypto = require 'crypto'
-    streamBuffers = require 'stream-buffers'
 
     constructor: (@id, @bolt) ->
         @status = false
@@ -24,7 +23,8 @@ class TowerAgent extends StormData
                 @monitoring
             (repeat) =>
                 try
-                    ###
+                    ### EXPERIMENTAL
+                    streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
                     req.method  = 'GET'
                     req.url     = '/'
@@ -34,17 +34,14 @@ class TowerAgent extends StormData
                     @log "monitor - checking #{@bolt.id}"
                     req = http.request '/'
                     req.target = 8000
-                    @bolt.relay req, (reply,complete) =>
-                        return unless reply?
-                        return if reply? and not reply instanceof Error and not complete
-
+                    @bolt.relay req, (reply,body) =>
                         unless reply instanceof Error
                             md5 = crypto.createHash "md5"
                             md5.update reply
                             checksum = md5.digest "hex"
                             unless checksum is @checksum
                                 try
-                                    status = JSON.parse reply
+                                    status = JSON.parse data
                                     @status = status
                                     @emit 'changed', status, checksum
                                     callback status if callback?
