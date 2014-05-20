@@ -16,16 +16,9 @@
     # proxy operation for stormflash requests
     @all '/agents/:id/*': ->
         match = tower.agents.get @params.id
-        if match? and match.bolt?
-            req = request
-                method: @req.method
-                url: @params[1]
-                timeout: 5000
-                body: @body
-            req.target = 8000
-            match.bolt.relay req, (chunk,complete) =>
-                @next chunk if chunk instanceof Error
-                if complete
-                    @send = chunk
+        if match? and match.bolt? and match.bolt.relay?
+            @req.target = 8000
+            @req.url = @params[0]
+            match.bolt.relay @req, @res
         else
             @send 404

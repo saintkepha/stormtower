@@ -23,39 +23,46 @@ class TowerAgent extends StormData
                 @monitoring
             (repeat) =>
                 try
-                    ### EXPERIMENTAL
                     streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
-                    req.method  = 'GET'
-                    req.url     = '/'
-                    req.headers = null
-                    req.put "GET / HTTP/1.1\n\n", "utf8"
-                    ###
+                    req.method = 'GET'
+                    req.url    = '/'
+                    req.target = 5000
+
                     @log "monitor - checking #{@bolt.id}"
-                    req = http.request '/'
-                    req.target = 8000
-                    @bolt.relay req, (reply,body) =>
-                        unless reply instanceof Error
-                            try
-                                md5 = crypto.createHash "md5"
-                                md5.update body
-                                checksum = md5.digest "hex"
-                                unless checksum is @checksum
-                                    status = JSON.parse body
-                                    @status = status
-                                    @emit 'changed', status, checksum
-                                    callback status if callback?
-                            catch err
-                                @log "unable to parse reply:", body
-                                @log "error:", err
-                        else
-                            @log "error:",reply
-
-                        setTimeout repeat, interval
-
+                    relay = @bolt.relay req
                 catch err
                     @log "agent discovery request failed:", err
                     setTimeout repeat, interval
+
+                header = null
+                body = ''
+                relay.on 'data', (chunk) =>
+                    try
+                        unless header
+                            header = JSON.parse chunk
+                        else
+                            body += chunk
+                    catch err
+                        @log "unable to parse header:", chunk
+                        @log "error:", err
+                        relay.end()
+
+                relay.on 'end', =>
+                    try
+                        md5 = crypto.createHash "md5"
+                        md5.update body
+                        checksum = md5.digest "hex"
+                        unless checksum is @checksum
+                            status = JSON.parse body
+                            @status = status
+                    catch err
+                        @log "unable to parse body:", body
+                        @log "error:", err
+                        relay.end()
+
+                @log "scheduling repeat at #{interval}"
+                setTimeout repeat, interval
             (err) =>
                 @log "agent discovery stopped for: #{@id}"
         )
@@ -78,6 +85,7 @@ class TowerRegistry extends StormRegistry
     get: (key) ->
         entry = super key
         return unless entry?
+        entry.status.id = entry.id
         entry.status
 
 #-----------------------------------------------------------------
@@ -105,7 +113,7 @@ class StormTower extends StormBolt
             entry = @agents.add bolt.id, new TowerAgent bolt.id, bolt
             entry.on 'changed', (status, checksum) ->
                 @agents.emit 'changed'
-            entry.monitor @config.repeatdelay, (status) =>
+            entry.monitor @config.monitorInterval, (status) =>
                 # this callback triggers when something changes
 
                 ###
