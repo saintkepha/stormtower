@@ -8,8 +8,8 @@ StormData = StormAgent.StormData
 
 class TowerAgent extends StormData
 
-    async = require('async')
-    request = require 'request'
+    async = require 'async'
+    http = require 'http'
     crypto = require("crypto")
 
     constructor: (@id, @bolt) ->
@@ -23,10 +23,7 @@ class TowerAgent extends StormData
                 @monitoring
             (repeat) =>
                 try
-                    req = request
-                        url: "/"
-                        timeout: interval
-                        encoding: 'utf8'
+                    req = http.request '/'
                     req.target = 8000
                     @bolt.relay req, (reply,complete) ->
                         return unless reply?
