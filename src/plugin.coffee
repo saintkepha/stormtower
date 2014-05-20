@@ -19,7 +19,7 @@
         if match? and match.bolt?
             req = request
                 method: @req.method
-                uri: @params[1]
+                url: @params[1]
                 timeout: 5000
                 body: @body
             req.target = 8000
