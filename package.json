@@ -31,6 +31,12 @@
 		"port": 8020,
 		"uuid": "stormtower",
 		"logfile": "/var/log/stormtower.log",
+		"cert": "/var/stormstack/tower.cert",
+		"key":  "/var/stormstack/tower.key",
+		"ca":   "/var/stormstack/ca.cert",
+		"uplinks": [ ],
+		"listenPort": 8017,
+		"monitorInterval": 15000,
 		"storm": {
 			"functions": [
 				"agent.agents"
