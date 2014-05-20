@@ -24,12 +24,15 @@ class TowerAgent extends StormData
                 @monitoring
             (repeat) =>
                 try
+                    ###
                     req = new streamBuffers.ReadableStreamBuffer
                     req.method  = 'GET'
                     req.url     = '/'
                     req.headers = null
-                    req.target  = 8000
                     req.put "GET / HTTP/1.1\n\n", "utf8"
+                    ###
+                    req = http.request
+                    req.target = 8000
                     @bolt.relay req, (reply,complete) ->
                         return unless reply?
                         return if reply? and not reply instanceof Error and not complete
@@ -39,10 +42,13 @@ class TowerAgent extends StormData
                             md5.update reply
                             checksum = md5.digest "hex"
                             unless checksum is @checksum
-                                status = JSON.parse reply
-                                @status = status
-                                @emit 'changed', status, checksum
-                                callback status if callback?
+                                try
+                                    status = JSON.parse reply
+                                    @status = status
+                                    @emit 'changed', status, checksum
+                                    callback status if callback?
+                                catch err
+                                    @log "unable to parse reply:", reply
                         setTimeout repeat, interval
 
                 catch err
