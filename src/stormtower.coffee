@@ -23,8 +23,9 @@ class TowerAgent extends StormData
             (repeat) =>
                 try
                     req = request
-                        uri: "http://#{@bolt.id}/"
+                        url: "http://#{@bolt.id}/"
                         timeout: interval
+                        encoding: 'utf8'
                     req.target = 8000
                     @bolt.relay req, (reply,complete) ->
                         return unless reply?
