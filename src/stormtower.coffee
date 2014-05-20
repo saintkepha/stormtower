@@ -13,7 +13,7 @@ class TowerAgent extends StormData
 
     constructor: (@id, @bolt) ->
         @status = false
-        super id, data
+        super id
 
     monitor: (interval, callback) ->
         @monitoring = true
@@ -23,7 +23,7 @@ class TowerAgent extends StormData
             (repeat) =>
                 try
                     req = request
-                        uri: '/'
+                        uri: "http://#{@bolt.id}/"
                         timeout: interval
                     req.target = 8000
                     @bolt.relay req, (reply,complete) ->
