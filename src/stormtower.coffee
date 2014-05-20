@@ -31,7 +31,7 @@ class TowerAgent extends StormData
                     req.headers = null
                     req.put "GET / HTTP/1.1\n\n", "utf8"
                     ###
-                    req = http.request
+                    req = http.request '/'
                     req.target = 8000
                     @bolt.relay req, (reply,complete) ->
                         return unless reply?
