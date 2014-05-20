@@ -85,7 +85,7 @@ class TowerRegistry extends StormRegistry
     get: (key) ->
         entry = super key
         return unless entry?
-        entry.status.id = entry.id
+        entry.status.id ?= entry.id
         entry.status
 
 #-----------------------------------------------------------------
