@@ -35,29 +35,16 @@ class TowerAgent extends StormData
                     @log "agent discovery request failed:", err
                     setTimeout repeat, interval
 
-                header = null
-                body = ''
-                relay.on 'data', (chunk) =>
-                    try
-                        unless header
-                            header = JSON.parse chunk
-                        else
-                            body += chunk
-                    catch err
-                        @log "unable to parse header:", chunk
-                        @log "error:", err
-                        relay.end()
-
-                relay.on 'end', =>
+                relay.on 'reply', (reply) =>
                     try
                         md5 = crypto.createHash "md5"
-                        md5.update body
+                        md5.update JSON.stringify reply.body
                         checksum = md5.digest "hex"
                         unless checksum is @checksum
-                            status = JSON.parse body
+                            status = JSON.parse reply.body
                             @status = status
                     catch err
-                        @log "unable to parse body:", body
+                        @log "unable to parse reply:", reply
                         @log "error:", err
                         relay.end()
 
@@ -121,6 +108,7 @@ class StormTower extends StormBolt
                 @agents.update bolt.id, entry
                 ###
         @clients.on 'removed', (bolt) =>
+            @log "removing bolt:",bolt
             @agents.remove bolt.id
 
     # super class overrides

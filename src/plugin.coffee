@@ -13,12 +13,9 @@
     @get '/agents': ->
         @send tower.agents.list()
 
-    # proxy operation for stormflash requests
-    @all '/agents/:id/*': ->
+    @get '/agents/:id': ->
         match = tower.agents.get @params.id
-        if match? and match.bolt? and match.bolt.relay?
-            @req.target = 8000
-            @req.url = @params[0]
-            match.bolt.relay @req, @res
+        if match?
+            @send match
         else
             @send 404
