@@ -11,7 +11,7 @@
         checksum = tower.agents.checksum()
         tower.log "checksum: #{checksum}"
         @res.set 'Content-MD5', checksum
-        @send 200
+        @send ''
 
     @get '/agents': ->
         @send tower.agents.list()
