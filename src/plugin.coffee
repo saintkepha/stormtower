@@ -7,8 +7,11 @@
     tower = @settings.agent
 
     @head '/agents': ->
-        @res.header 'Content-MD5', tower.agents.checksum()
-        @res.send ''
+        tower.log "calculating checksum..."
+        checksum = tower.agents.checksum()
+        tower.log "checksum: #{checksum}"
+        @res.set 'Content-MD5', checksum
+        @send 200
 
     @get '/agents': ->
         @send tower.agents.list()

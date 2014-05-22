@@ -29,7 +29,6 @@ class TowerAgent extends StormData
             () =>
                 @monitoring
             (repeat) =>
-                @check
                 try
                     streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
@@ -39,31 +38,29 @@ class TowerAgent extends StormData
 
                     @log "monitor - checking #{@bolt.id} for status"
                     relay = @bolt.relay req
+                    relay.on 'reply', (reply) =>
+                        try
+                            status = JSON.parse reply.body
+                            copy = extend({},status)
+                            delete copy.os # os info changes all the time...
+                            md5 = crypto.createHash "md5"
+                            md5.update JSON.stringify copy
+                            checksum = md5.digest "hex"
+                            unless checksum is @checksum
+                                @checksum = checksum
+                                unless @status
+                                    @emit 'ready'
+                                @status = status
+                                @emit 'changed'
+                        catch err
+                            @log "unable to parse reply:", reply
+                            @log "error:", err
+                            relay.end()
                 catch err
                     @log "monitor - agent discovery request failed:", err
+                finally
+                    @log "monitor - scheduling repeat at #{interval}"
                     setTimeout repeat, interval
-
-                relay.on 'reply', (reply) =>
-                    try
-                        status = JSON.parse reply.body
-                        copy = extend({},status)
-                        delete copy.os # os info changes all the time...
-                        md5 = crypto.createHash "md5"
-                        md5.update JSON.stringify copy
-                        checksum = md5.digest "hex"
-                        unless checksum is @checksum
-                            @checksum = checksum
-                            unless @status
-                                @emit 'ready'
-                            @status = status
-                            @emit 'changed'
-                    catch err
-                        @log "unable to parse reply:", reply
-                        @log "error:", err
-                        relay.end()
-
-                @log "monitor - scheduling repeat at #{interval}"
-                setTimeout repeat, interval
             (err) =>
                 @log "monitor - agent discovery stopped for: #{@id}"
                 @monitoring = false
