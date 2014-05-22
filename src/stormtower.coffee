@@ -14,14 +14,22 @@ class TowerAgent extends StormData
 
     constructor: (@id, @bolt) ->
         @status = false
+        @checksum = null
+        @monitoring = false
+
         super id
 
-    monitor: (interval, callback) ->
+    monitor: (interval) ->
+        return if @monitoring # we don't want to schedule this multiple times...
+
+        extend = require('util')._extend
+
         @monitoring = true
         async.whilst(
             () =>
                 @monitoring
             (repeat) =>
+                @check
                 try
                     streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
@@ -29,29 +37,36 @@ class TowerAgent extends StormData
                     req.url    = '/'
                     req.target = 5000
 
-                    @log "monitor - checking #{@bolt.id}"
+                    @log "monitor - checking #{@bolt.id} for status"
                     relay = @bolt.relay req
                 catch err
-                    @log "agent discovery request failed:", err
+                    @log "monitor - agent discovery request failed:", err
                     setTimeout repeat, interval
 
                 relay.on 'reply', (reply) =>
                     try
+                        status = JSON.parse reply.body
+                        copy = extend({},status)
+                        delete copy.os # os info changes all the time...
                         md5 = crypto.createHash "md5"
-                        md5.update JSON.stringify reply.body
+                        md5.update JSON.stringify copy
                         checksum = md5.digest "hex"
                         unless checksum is @checksum
-                            status = JSON.parse reply.body
+                            @checksum = checksum
+                            unless @status
+                                @emit 'ready'
                             @status = status
+                            @emit 'changed'
                     catch err
                         @log "unable to parse reply:", reply
                         @log "error:", err
                         relay.end()
 
-                @log "scheduling repeat at #{interval}"
+                @log "monitor - scheduling repeat at #{interval}"
                 setTimeout repeat, interval
             (err) =>
-                @log "agent discovery stopped for: #{@id}"
+                @log "monitor - agent discovery stopped for: #{@id}"
+                @monitoring = false
         )
 
     destroy: ->
@@ -71,7 +86,7 @@ class TowerRegistry extends StormRegistry
 
     get: (key) ->
         entry = super key
-        return unless entry?
+        return unless entry? and entry.status?
         entry.status.id ?= entry.id
         entry.status
 
@@ -81,8 +96,6 @@ StormBolt = require 'stormbolt'
 
 class StormTower extends StormBolt
 
-    crypto = require("crypto")
-
     # Constructor for stormtower class
     constructor: (config) ->
         super config
@@ -91,24 +104,18 @@ class StormTower extends StormBolt
 
         @agents = new TowerRegistry
 
-        @checksum = ->
-            md5 = crypto.createHash "md5"
-            md5.update agent for agent in @agents.list()
-            md5.digest "hex"
-
         @clients.on 'added', (bolt) =>
-            entry = @agents.add bolt.id, new TowerAgent bolt.id, bolt
-            entry.on 'changed', (status, checksum) ->
-                @agents.emit 'changed'
-            entry.monitor @config.monitorInterval, (status) =>
-                # this callback triggers when something changes
+            tagent = new TowerAgent bolt.id, bolt
+            tagent.monitor @config.monitorInterval
 
-                ###
-                entry.status = data
-                @agents.update bolt.id, entry
-                ###
+            # during monitoring, ready will be emitted once status is retrieved
+            tagent.once 'ready', =>
+                @agents.add bolt.id, tagent
+                tagent.on 'changed', =>
+                    @agents.emit 'changed'
+
         @clients.on 'removed', (bolt) =>
-            @log "removing bolt:",bolt
+            @log "boltstream #{bolt.id} is removed"
             @agents.remove bolt.id
 
     # super class overrides

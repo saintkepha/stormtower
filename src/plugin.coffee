@@ -7,7 +7,7 @@
     tower = @settings.agent
 
     @head '/agents': ->
-        @res.header('Content-MD5', tower.checksum())
+        @res.header 'Content-MD5', tower.agents.checksum()
         @res.send ''
 
     @get '/agents': ->
