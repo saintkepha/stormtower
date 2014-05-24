@@ -144,10 +144,11 @@ if require.main is module
     config.logfile = argv.l ? "/var/log/stormtower.log"
     config.datadir = argv.d ? "/var/stormstack"
     ###
-
+  
+    config = null
     storm = null # override during dev
-    agent = new StormTower
-    agent.run()
+    agent = new StormTower config
+    agent.run storm
 
     # Garbage collect every 2 sec
     # Run node with --expose-gc
