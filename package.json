@@ -9,6 +9,7 @@
 		"url": "git://github.com/stormstack/stormtower.git"
 	},
 	"dependencies": {
+		"stormagent": "0.2.x",
 		"stormbolt": "0.3.x",
 		"request": "2.34.x",
 		"json-schema": "0.2.0",
