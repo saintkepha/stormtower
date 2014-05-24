@@ -6,7 +6,7 @@ StormAgent = require 'stormagent'
 
 StormData = StormAgent.StormData
 
-class TowerAgent extends StormData
+class TowerMinion extends StormData
 
     async = require 'async'
     http = require 'http'
@@ -57,12 +57,12 @@ class TowerAgent extends StormData
                             @log "error:", err
                             relay.end()
                 catch err
-                    @log "monitor - agent discovery request failed:", err
+                    @log "monitor - minion discovery request failed:", err
                 finally
                     @log "monitor - scheduling repeat at #{interval}"
                     setTimeout repeat, interval
             (err) =>
-                @log "monitor - agent discovery stopped for: #{@id}"
+                @log "monitor - minion discovery stopped for: #{@id}"
                 @monitoring = false
         )
 
@@ -76,8 +76,8 @@ StormRegistry = StormAgent.StormRegistry
 class TowerRegistry extends StormRegistry
 
     constructor: (filename) ->
-        @on 'removed', (tagent) ->
-            tagent.destroy() if tagent.destroy?
+        @on 'removed', (minion) ->
+            minion.destroy() if minion.destroy?
 
         super filename
 
@@ -99,28 +99,58 @@ class StormTower extends StormBolt
         # key routine to import itself
         @import module
 
-        @agents = new TowerRegistry
+        @minions = new TowerRegistry
 
         @clients.on 'added', (bolt) =>
-            tagent = new TowerAgent bolt.id, bolt
-            tagent.monitor @config.monitorInterval
+            minion = new TowerMinion bolt.id, bolt
+            minion.monitor @config.monitorInterval
 
             # during monitoring, ready will be emitted once status is retrieved
-            tagent.once 'ready', =>
-                @agents.add bolt.id, tagent
-                tagent.on 'changed', =>
-                    @agents.emit 'changed'
+            minion.once 'ready', =>
+                @minions.add bolt.id, minion
+                minion.on 'changed', =>
+                    @minions.emit 'changed'
 
         @clients.on 'removed', (bolt) =>
             @log "boltstream #{bolt.id} is removed"
-            @agents.remove bolt.id
+            @minions.remove bolt.id
 
     # super class overrides
     status: ->
         state = super
-        state.agents = @agents.list()
+        state.minions = @minions.list()
         state
 
 #module.exports = stormtower
 module.exports = StormTower
 
+#-------------------------------------------------------------------------------------------
+
+if require.main is module
+    console.log 'stormtower rising up to stand against the coming storm...'
+    ###
+    argv = require('minimist')(process.argv.slice(2))
+    if argv.h?
+        console.log """
+            -h view this help
+            -p port number
+            -l logfile
+            -d datadir
+        """
+        return
+
+    config = {}
+    config.port    = argv.p ? 5000
+    config.logfile = argv.l ? "/var/log/stormtower.log"
+    config.datadir = argv.d ? "/var/stormstack"
+    ###
+
+    storm = null # override during dev
+    agent = new StormTower
+    agent.run()
+
+    # Garbage collect every 2 sec
+    # Run node with --expose-gc
+    setInterval (
+        () -> gc()
+    ), 2000 if gc?

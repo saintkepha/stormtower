@@ -6,18 +6,17 @@
 @include = ->
     tower = @settings.agent
 
-    @head '/agents': ->
-        tower.log "calculating checksum..."
-        checksum = tower.agents.checksum()
+    @head '/minions': ->
+        checksum = tower.minions.checksum()
         tower.log "checksum: #{checksum}"
         @res.set 'Content-MD5', checksum
         @send ''
 
-    @get '/agents': ->
-        @send tower.agents.list()
+    @get '/minions': ->
+        @send tower.minions.list()
 
-    @get '/agents/:id': ->
-        match = tower.agents.get @params.id
+    @get '/minions/:id': ->
+        match = tower.minions.get @params.id
         if match?
             @send match
         else
