@@ -39,13 +39,13 @@ On success it returns the global md5 checksum string in the Content-MD5 header f
 
 ### Response Header
 
-HTTP/1.1 200 OK
-X-Powered-By: Zappa 0.4.22
-Content-MD5: 0f3f94260e4481e782754503ac2ece1f
-Content-Type: text/html; charset=utf-8
-Content-Length: 0
-Date: Wed, 28 May 2014 06:12:43 GMT
-Connection: keep-alive
+    HTTP/1.1 200 OK
+    X-Powered-By: Zappa 0.4.22
+    Content-MD5: 0f3f94260e4481e782754503ac2ece1f
+    Content-Type: text/html; charset=utf-8
+    Content-Length: 0
+    Date: Wed, 28 May 2014 06:12:43 GMT
+    Connection: keep-alive
 
 
 Get details of all active stormflash agents
