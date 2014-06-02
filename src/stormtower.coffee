@@ -58,6 +58,7 @@ class TowerMinion extends StormData
                             relay.end()
                 catch err
                     @log "monitor - minion discovery request failed:", err
+                    @monitoring = false
                 finally
                     @log "monitor - scheduling repeat at #{interval}"
                     setTimeout repeat, interval
