@@ -40,6 +40,8 @@ class TowerMinion extends StormData
                     relay = @bolt.relay req
                     relay.on 'reply', (reply) =>
                         try
+                            #destrory the req stream - we dont need any more
+                            req.destroy()
                             status = JSON.parse reply.body
                             copy = extend({},status)
                             delete copy.os # os info changes all the time...
