@@ -38,10 +38,12 @@ class TowerMinion extends StormData
 
                     @log "monitor - checking #{@bolt.id} for status"
                     relay = @bolt.relay req
+                    relay.on 'sent', (request) =>
+                        # destroy the request stream since it's been sent
+                        request.destroy()
+
                     relay.on 'reply', (reply) =>
                         try
-                            #destrory the req stream - we dont need any more
-                            req.destroy()
                             status = JSON.parse reply.body
                             copy = extend({},status)
                             delete copy.os # os info changes all the time...
@@ -60,7 +62,10 @@ class TowerMinion extends StormData
                             relay.end()
                 catch err
                     @log "monitor - minion discovery request failed:", err
-                    @monitoring = false
+                    try
+                        req.destroy() if req?
+                    catch err
+                        @log "monitor - destroying request failed... (this should not happen)", err
                 finally
                     @log "monitor - scheduling repeat at #{interval}"
                     setTimeout repeat, interval
@@ -147,7 +152,7 @@ if require.main is module
     config.logfile = argv.l ? "/var/log/stormtower.log"
     config.datadir = argv.d ? "/var/stormstack"
     ###
-  
+
     config = null
     storm = null # override during dev
     agent = new StormTower config
