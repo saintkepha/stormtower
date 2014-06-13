@@ -1,7 +1,7 @@
 {
     "name": "stormtower",
 	"description": "stormtower handles the connectivity from stormflash agents and provides visibility, also acts as a translator between stormlight and agents",
-	"version": "1.2.4",
+	"version": "1.2.5",
 	"author": "Priyabrata Sahoo",
 	"homepage": "http://stormstack.org",
 	"repository": {
@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"stormagent": "0.2.x",
-		"stormbolt": "0.3.9",
+		"stormbolt": ">=0.3.11",
 		"request": "2.34.x",
 		"json-schema": "0.2.0",
 		"async": "0.8.x",
