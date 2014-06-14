@@ -11,6 +11,7 @@ class TowerMinion extends StormData
     async = require 'async'
     http = require 'http'
     crypto = require 'crypto'
+    streamBuffers = require 'stream-buffers'
 
     constructor: (@id, @bolt) ->
         @status = false
@@ -30,7 +31,6 @@ class TowerMinion extends StormData
                 @monitoring
             (repeat) =>
                 try
-                    streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
                     req.method = 'GET'
                     req.url    = '/'
