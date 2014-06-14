@@ -48,7 +48,7 @@
 	},
 	"scripts": {
 		"prepublish": "mkdir -p lib; coffee -o lib -c src",
-		"start": "node --expose-gc lib/stormtower"
+		"start": "node lib/stormtower"
 	},
 	"contributors": [
 		"Sivaprasath Busa",

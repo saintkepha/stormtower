@@ -157,9 +157,3 @@ if require.main is module
     storm = null # override during dev
     agent = new StormTower config
     agent.run storm
-
-    # Garbage collect every 2 sec
-    # Run node with --expose-gc
-    setInterval (
-        () -> gc()
-    ), 60000 if gc?
