@@ -11,6 +11,7 @@ class TowerMinion extends StormData
     async = require 'async'
     http = require 'http'
     crypto = require 'crypto'
+    streamBuffers = require 'stream-buffers'
 
     constructor: (@id, @bolt) ->
         @status = false
@@ -30,7 +31,6 @@ class TowerMinion extends StormData
                 @monitoring
             (repeat) =>
                 try
-                    streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
                     req.method = 'GET'
                     req.url    = '/status'
@@ -155,9 +155,3 @@ if require.main is module
     storm = null # override during dev
     agent = new StormTower config
     agent.run storm
-
-    # Garbage collect every 2 sec
-    # Run node with --expose-gc
-    setInterval (
-        () -> gc()
-    ), 2000 if gc?
