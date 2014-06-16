@@ -33,7 +33,7 @@ class TowerMinion extends StormData
                     streamBuffers = require 'stream-buffers'
                     req = new streamBuffers.ReadableStreamBuffer
                     req.method = 'GET'
-                    req.url    = '/'
+                    req.url    = '/status'
                     req.target = 5000
 
                     @log "monitor - checking #{@bolt.id} for status"
