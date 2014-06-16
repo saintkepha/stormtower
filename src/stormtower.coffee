@@ -38,10 +38,8 @@ class TowerMinion extends StormData
 
                     @log "monitor - checking #{@bolt.id} for status"
                     relay = @bolt.relay req
-                    relay.on 'sent', (request) =>
-                        # destroy the request stream since it's been sent
-                        request.destroy()
-
+                    # destroy the request stream since it's been sent
+                    req.destroy()
                     relay.on 'reply', (reply) =>
                         try
                             status = JSON.parse reply.body
