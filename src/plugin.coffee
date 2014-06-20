@@ -21,3 +21,10 @@
             @send match
         else
             @send 404
+
+    @head '/minions/:id': ->
+        match = tower.minions.get @params.id
+        if match?
+            @send match.checksum
+        else
+            @send 404
