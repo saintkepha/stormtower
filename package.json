@@ -1,0 +1,58 @@
+{
+    "name": "stormtower",
+	"description": "stormtower handles the connectivity from stormflash agents and provides visibility, also acts as a translator between stormlight and agents",
+	"version": "1.3.1",
+	"author": "Priyabrata Sahoo",
+	"homepage": "http://stormstack.org",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/stormstack/stormtower.git"
+	},
+	"dependencies": {
+		"stormagent": ">=0.3.0",
+		"stormbolt": ">=0.4.0",
+		"request": "2.34.x",
+		"json-schema": "0.2.0",
+		"async": "0.8.x",
+		"node-uuid": "1.3.x",
+		"minimist":"0.1.0",
+        "optimist":"0.6.0",
+		"find-in-path":"0.0.x",
+		"stream-buffers":"0.2.x"
+	},
+	"devDependencies": {
+		"coffee-script": ">=1.3"
+	},
+	"optionalDependencies": {},
+	"engines": {
+		"node": ">=0.6.x"
+	},
+	"main": "./lib/stormtower",
+	"config": {
+		"port": 8020,
+		"logfile": "/var/log/stormtower.log",
+		"cert": "/var/stormstack/tower.cert",
+		"key":  "/var/stormstack/tower.key",
+		"ca":   "/var/stormstack/ca.cert",
+		"uplinks": [ ],
+		"listenPort": 443,
+		"monitorInterval": 15000,
+		"storm": {
+			"functions": [
+				"agent.agents"
+			],
+			"plugins": [
+				"lib/plugin"
+			]
+		}
+	},
+	"scripts": {
+		"prepublish": "mkdir -p lib; coffee -o lib -c src",
+		"start": "node lib/stormtower"
+	},
+	"contributors": [
+		"Sivaprasath Busa",
+		"Peter Lee <peter@intercloud.net>",
+		"Suresh Kumar"
+	]
+}
