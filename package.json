@@ -44,7 +44,10 @@
 			"plugins": [
 				"lib/plugin"
 			]
-		}
+		},
+        "notifications": {
+            "producer": "amq://guest:guest@192.168.102.62:61613/exchange/stormtower/notifications"
+        }
 	},
 	"scripts": {
 		"prepublish": "mkdir -p lib; coffee -o lib -c src",

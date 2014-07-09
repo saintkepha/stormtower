@@ -96,6 +96,7 @@ class TowerRegistry extends StormRegistry
 #-----------------------------------------------------------------
 
 StormBolt = require 'stormbolt'
+stompConnect = require './notification'
 
 class StormTower extends StormBolt
 
@@ -105,6 +106,15 @@ class StormTower extends StormBolt
         # key routine to import itself
         @import module
 
+        @log "Connecting to ", @config.notifications.producer
+        stompConnect @config.notifications.producer, (stompclient, path) =>
+            if stompclient instanceof Error
+                @log "Cannot Connect to Notification server"
+            else
+                @log "Connect to Notification server #{@cohnfig.notifications.producer}"
+                @notifyClient = stompclient
+                @notifyPath = path
+
         @minions = new TowerRegistry
 
         @clients.on 'added', (bolt) =>
@@ -113,6 +123,11 @@ class StormTower extends StormBolt
 
             # during monitoring, ready will be emitted once status is retrieved
             minion.once 'ready', =>
+                message =
+                    id: bolt.id
+                    event_type: 'minion.ready'
+
+                @notifyClient.send  @notifyPath, {},  message
                 @minions.add bolt.id, minion
                 minion.on 'changed', =>
                     @minions.emit 'changed'
@@ -120,6 +135,10 @@ class StormTower extends StormBolt
         @clients.on 'removed', (bolt) =>
             @log "boltstream #{bolt.id} is removed"
             @minions.remove bolt.id
+            message =
+                id: bolt.id
+                event_type: 'minion.removed'
+            @notifyClient.send @notifyPath, {}, message
 
     # super class overrides
     status: ->
@@ -150,6 +169,7 @@ if require.main is module
     config.logfile = argv.l ? "/var/log/stormtower.log"
     config.datadir = argv.d ? "/var/stormstack"
     ###
+
 
     config = null
     storm = null # override during dev
