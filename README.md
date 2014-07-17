@@ -2,8 +2,17 @@ stormtower
 ==========
 
 
-*List of polling APIs*
-========================
+
+*Synopsis*
+----------
+stormtower helps stormlight to interface with stormflash endpoints in realizing the defined functionality.
+
+Stormlight relies on stormtower to reach out to stormflash endpoints by specifying the cname of the endpoint it wishes to configure. Stormflash endpoints can  be anywhere, sometimes running in a different network or geographical locations. stormtower uses a secure communication channel provided by stormbolt, to communicate the stormflash endpoints.
+
+It interfaces with stormlight on the north bound and with stormflash endpoints in the south bound. It interacts with Stormbolt relay server in east-west bound.
+
+*List of APIs*
+--------------
 
 <table>
   <tr>
@@ -1126,4 +1135,17 @@ GET  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
       "services": [],
       "instances": []
     }
+
+
+
+*Code Sample*
+-------------------------
+
+
+
+
+
+*Copyrights and License*
+-------------------------
+
 
