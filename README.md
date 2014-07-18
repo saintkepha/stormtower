@@ -1,13 +1,13 @@
-stormtower
+Stormtower
 ==========
 
 
 
 *Synopsis*
 ----------
-stormtower helps stormlight to interface with stormflash endpoints in realizing the defined functionality.
+Stormtower helps stormlight to interface with stormflash endpoints in realizing the defined functionality.
 
-Stormlight relies on stormtower to reach out to stormflash endpoints by specifying the cname of the endpoint it wishes to configure. Stormflash endpoints can  be anywhere, sometimes running in a different network or geographical locations. stormtower uses a secure communication channel provided by stormbolt, to communicate the stormflash endpoints.
+Stormlight relies on stormtower to reach out to stormflash endpoints by specifying the cname of the endpoint it wishes to configure. Stormflash endpoints can  be anywhere, sometimes running in a different network or geographical locations. Stormtower uses a secure communication channel provided by stormbolt, to communicate the stormflash endpoints.
 
 It interfaces with stormlight on the north bound and with stormflash endpoints in the south bound. It interacts with Stormbolt relay server in east-west bound.
 
@@ -35,8 +35,8 @@ It interfaces with stormlight on the north bound and with stormflash endpoints i
 Get global md5 checksum
 ------------------------
 
-    Verb   URI                              Description
-    HEAD   /minions                         global md5 checksum of all stormflash agents's response objects
+    Verb     URI              Description
+    HEAD     /minions         global md5 checksum of all stormflash agents's response objects
 
 On success it returns the global md5 checksum string in the Content-MD5 header field. This MD5 checksum string is generated from the response object of all stormflash agent connected to stormbolt server.
 
@@ -51,11 +51,11 @@ On success it returns the global md5 checksum string in the Content-MD5 header f
     Connection: keep-alive
 
 
-Get details of all active stormflash agents
---------------------------------------------
+Get details about all stormflash agents
+---------------------------------------
 
-    Verb   URI                              Description
-    GET   /minions                          a list containing details about all stormflash agents connected to stormbolt server
+    Verb     URI              Description
+    GET      /minions         list containing details about all stormflash agents connected to stormbolt server
 
 On success it returns the list of response objects collected from GET /status endpoint of all stormflash agents connected to stormbolt server.
 
@@ -580,11 +580,11 @@ On success it returns the list of response objects collected from GET /status en
       }
     ]
 
-Get md5 checksum of specific stormflash agent
-----------------------------------------------
+Get md5 checksum of given stormflash agent
+------------------------------------------
 
-    Verb   URI                              Description
-    HEAD   /minions/:id                     get md5 checksum of specific stormflash agents's response object
+    Verb     URI                Description
+    HEAD     /minions/:id       get md5 checksum of a specific stormflash agents's response object
 
 On success it returns the md5 checksum string in the Content-MD5 header field. This MD5 checksum string is generated from the response object of given stormflash agent mentioned in the url.
 
@@ -604,13 +604,13 @@ HEAD  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
     Connection: keep-alive
 
 
-Get details of specific stormflash agent
------------------------------------------
+Get details about given stormflash agent
+----------------------------------------
 
-    Verb   URI                              Description
-    GET    /minions/:id                     details of a given stormflash agent
+    Verb     URI                Description
+    GET      /minions/:id       details of a given stormflash agent
 
-On success it returns the the response object from GET /status endpoint of stormflash agent mentioned in the url.
+On success it returns the the response object from GET /status endpoint of stormflash agent mentioned in the url. This contains metadata about the agent, network and OS relared info ialong with list of debian packages installed on it.
 
 ### Request URL
 
@@ -1138,14 +1138,45 @@ GET  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
 
 
 
-*Code Sample*
--------------------------
+Code Sample
+-----------
+
+### Snippet 1:
+
+Stormtower keeps polling each stormagent in specific interval of time.
+
+
+        @monitoring = true
+        async.whilst(
+            () =>
+                @monitoring
+            (repeat) =>
+                try
+                    req = new streamBuffers.ReadableStreamBuffer
+                    req.method = 'GET'
+                    req.url    = '/status'
+                    req.target = 5000
+
+                    relay = @bolt.relay req
+                    req.destroy()
 
 
 
+Copyrights and License
+----------------------
 
+LICENSE
 
-*Copyrights and License*
--------------------------
+MIT
 
+COPYRIGHT AND PERMISSION NOTICE
 
+Copyright (c) 2014-2015, Clearpath Networks, licensing@clearpathnet.com.
+
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
