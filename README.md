@@ -3,7 +3,7 @@ Stormtower
 
 
 
-*Synopsis*
+Synopsis
 ----------
 Stormtower helps stormlight to interface with stormflash endpoints in realizing the defined functionality.
 
@@ -11,7 +11,7 @@ Stormlight relies on stormtower to reach out to stormflash endpoints by specifyi
 
 It interfaces with stormlight on the north bound and with stormflash endpoints in the south bound. It interacts with Stormbolt relay server in east-west bound.
 
-*List of APIs*
+List of APIs
 --------------
 
 <table>
