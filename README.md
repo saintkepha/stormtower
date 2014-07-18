@@ -1143,8 +1143,19 @@ Code Sample
 
 ### Snippet 1:
 
-Stormtower keeps polling each stormagent in specific interval of time.
+Stormtower extends Stormbolt class. Hence stormtower inherits all the API endpoints, class methods and variables available in base class stormbolt.
 
+    StormBolt = require 'stormbolt'
+
+    class StormTower extends StormBolt
+
+        # Constructor for stormtower class
+        constructor: (config) ->
+            super config
+
+### Snippet 2:
+
+Stormtower keeps monitoring each stormflash agents in specific interval of time. The output of the response is used, to generates md5 checksum of corresponding stormflash agent. Based on this md5 checksum Stormlight comes to know if packages got installed, uninstalled or updated in stormflash agent.
 
         @monitoring = true
         async.whilst(
