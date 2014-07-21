@@ -175,16 +175,6 @@ On success it returns the list of response objects collected from GET /status en
             "id": "07e33f9c-3a9a-40a3-a0e8-cd6ce0dc05ed"
           },
           {
-            "name": "apt",
-            "version": "0.9.7.2",
-            "source": "builtin",
-            "type": "dpkg",
-            "status": {
-              "installed": true
-            },
-            "id": "5db96247-9ea8-4cfd-8be0-f07ae309bfa1"
-          },
-          {
             "name": "corenova",
             "version": "1.4.2",
             "source": "builtin",
@@ -410,16 +400,6 @@ GET  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
             "installed": true
           },
           "id": "07e33f9c-3a9a-40a3-a0e8-cd6ce0dc05ed"
-        },
-        {
-          "name": "apt",
-          "version": "0.9.7.2",
-          "source": "builtin",
-          "type": "dpkg",
-          "status": {
-            "installed": true
-          },
-          "id": "5db96247-9ea8-4cfd-8be0-f07ae309bfa1"
         },
         {
           "name": "corenova",
