@@ -32,15 +32,14 @@ List of APIs
   </tr>
 </table>
 
-Get global md5 checksum
-------------------------
+###Get global md5 checksum
 
     Verb     URI              Description
     HEAD     /minions         global md5 checksum of all stormflash agents's response objects
 
 On success it returns the global md5 checksum string in the Content-MD5 header field. This MD5 checksum string is generated from the response object of all stormflash agent connected to stormbolt server.
 
-### Response Header
+#### Response Header
 
     HTTP/1.1 200 OK
     X-Powered-By: Zappa 0.4.22
@@ -51,15 +50,14 @@ On success it returns the global md5 checksum string in the Content-MD5 header f
     Connection: keep-alive
 
 
-Get details about all stormflash agents
----------------------------------------
+###Get details about all stormflash agents
 
     Verb     URI              Description
     GET      /minions         list containing details about all stormflash agents connected to stormbolt server
 
 On success it returns the list of response objects collected from GET /status endpoint of all stormflash agents connected to stormbolt server.
 
-### Response 
+#### Response 
 
     [
       {
@@ -225,16 +223,6 @@ On success it returns the list of response objects collected from GET /status en
             "id": "9faecb92-58e0-4cb7-aa67-a8913b064a25"
           },
           {
-            "name": "stormflash",
-            "version": "0.4.0",
-            "source": "builtin",
-            "type": "dpkg",
-            "status": {
-              "installed": true
-            },
-            "id": "83310178-09e5-4f33-b32c-a3ce6db2e3d1"
-          },
-          {
             "name": "uproxy",
             "version": "1.4.0",
             "source": "builtin",
@@ -250,20 +238,19 @@ On success it returns the list of response objects collected from GET /status en
       }
     ]
 
-Get md5 checksum of given stormflash agent
-------------------------------------------
+###Get md5 checksum of given stormflash agent
 
     Verb     URI                Description
     HEAD     /minions/:id       get md5 checksum of a specific stormflash agents's response object
 
 On success it returns the md5 checksum string in the Content-MD5 header field. This MD5 checksum string is generated from the response object of given stormflash agent mentioned in the url.
 
-### Request URL
+#### Request URL
 
 HEAD  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
 
 
-### Response Header
+#### Response Header
 
     HTTP/1.1 200 OK
     X-Powered-By: Zappa 0.4.22
@@ -274,20 +261,19 @@ HEAD  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
     Connection: keep-alive
 
 
-Get details about given stormflash agent
-----------------------------------------
+###Get details about given stormflash agent
 
     Verb     URI                Description
     GET      /minions/:id       details of a given stormflash agent
 
 On success it returns the the response object from GET /status endpoint of stormflash agent mentioned in the url. This contains metadata about the agent, network and OS relared info ialong with list of debian packages installed on it.
 
-### Request URL
+#### Request URL
 
 GET  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
 
 
-### Response 
+#### Response 
 
     {
       "id": "30a2a131-f812-4666-bb69-c443f7e3a901",
@@ -452,16 +438,6 @@ GET  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
           "id": "9faecb92-58e0-4cb7-aa67-a8913b064a25"
         },
         {
-          "name": "stormflash",
-          "version": "0.4.0",
-          "source": "builtin",
-          "type": "dpkg",
-          "status": {
-            "installed": true
-          },
-          "id": "83310178-09e5-4f33-b32c-a3ce6db2e3d1"
-        },
-        {
           "name": "uproxy",
           "version": "1.4.0",
           "source": "builtin",
@@ -478,24 +454,49 @@ GET  /minions/30a2a131-f812-4666-bb69-c443f7e3a901
 
 
 
-Code Sample
------------
+Usage
+-----
 
-### Snippet 1:
+### Code Snippet 1:
 
-Stormtower extends Stormbolt class. Hence stormtower inherits all the API endpoints, class methods and variables available in base class stormbolt.
+As Stormtower extends Stormbolt class, it inherits all the API endpoints, class methods and variables available in base class of stormbolt. When new Stormbolt clients connects to Stormbolt server, it is added as a new TowerMinion. TowerMinion monitors the Stormbolt client periodically to fetch the available plugins and services on it. Once the Stormbolt client moves to ready state, it is added to TowerRegistry.
 
     StormBolt = require 'stormbolt'
-
+    
     class StormTower extends StormBolt
-
+    
         # Constructor for stormtower class
         constructor: (config) ->
             super config
+            # key routine to import itself
+            @import module
+    
+            @minions = new TowerRegistry
+    
+            @clients.on 'added', (bolt) =>
+                minion = new TowerMinion bolt.id, bolt
+                minion.monitor @config.monitorInterval
+    
+                # during monitoring, ready will be emitted once status is retrieved
+                minion.once 'ready', =>
+                    @minions.add bolt.id, minion
+                    minion.on 'changed', =>
+                        @minions.emit 'changed'
+    
+            @clients.on 'removed', (bolt) =>
+                @log "boltstream #{bolt.id} is removed"
+                @minions.remove bolt.id
+    
+    if require.main is module
+        config = null
+        storm = null
+        agent = new StormTower config
+        agent.run storm
 
-### Snippet 2:
 
-Stormtower keeps monitoring each stormflash agents in specific interval of time. The output of the response is used, to generates md5 checksum of corresponding stormflash agent. Based on this md5 checksum Stormlight comes to know if packages got installed, uninstalled or updated in stormflash agent.
+### Code Snippet 2:
+
+TowerMinion keeps monitoring the /status endpoint of each minion or Stormbolt client in specific interval of time. The output of the response is used, to generates md5 checksum of corresponding stormflash agent. Based on this md5 checksum Stormlight comes to know if packages got installed, uninstalled or updated in stormflash agent.
 
         @monitoring = true
         async.whilst(
@@ -511,6 +512,20 @@ Stormtower keeps monitoring each stormflash agents in specific interval of time.
                     relay = @bolt.relay req
                     req.destroy()
 
+
+### Code Snippet 3:
+
+Defining API endpoints to access Stormtower services like fetching global and individual md5 checksum of Stormbolt client, metadata of all or specific bolt client.
+
+    @get '/minions': ->
+        @send tower.minions.list()
+
+    @get '/minions/:id': ->
+        match = tower.minions.get @params.id
+        if match?
+            @send match
+        else
+            @send 404
 
 
 Copyrights and License
