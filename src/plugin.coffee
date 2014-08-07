@@ -25,6 +25,8 @@
     @head '/minions/:id': ->
         match = tower.minions.get @params.id
         if match?
-            @send match.checksum
+            @res.set 'Content-MD5', match.checksum
+            @send ''
         else
-            @send 404
+            @res.status(404)
+            @send ''
