@@ -113,12 +113,16 @@ class StormTower extends StormBolt
 
             # during monitoring, ready will be emitted once status is retrieved
             minion.once 'ready', =>
+                @app.io.sockets.emit 'minion.new', bolt.id, minion
                 @minions.add bolt.id, minion
                 minion.on 'changed', =>
                     @minions.emit 'changed'
+                    @app.io.sockets.emit 'minion.update', bolt.id, minion
 
         @clients.on 'removed', (bolt) =>
             @log "boltstream #{bolt.id} is removed"
+            entry = @minions.get bolt.id
+            @app.io.sockets.emit 'minion.remove', bolt.id, entry if entry?
             @minions.remove bolt.id
 
     # super class overrides
