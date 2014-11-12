@@ -47,6 +47,7 @@
 		}
 	},
 	"scripts": {
+		"test": "mocha test --compilers coffee:coffee-script/register",
 		"prepublish": "mkdir -p lib; coffee -o lib -c src",
 		"start": "node lib/stormtower"
 	},
